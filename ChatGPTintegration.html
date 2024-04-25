@@ -1,0 +1,54 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Web Interface</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #998efc; }
+        .chat-container { max-width: 600px; margin: 20px auto; border: 1px solid #ccc; padding: 20px; overflow-y: auto; height: 400px; background-color: #fff; }
+        .message { margin-bottom: 10px; padding: 10px; border-radius: 8px; }
+        .user-message { text-align: right; color: white; background-color: #4a76a8; }
+        .bot-message { text-align: left; color: white; background-color: #4caf50; }
+        input[type="text"], button { padding: 10px; font-size: 16px; margin-top: 10px; }
+        input[type="text"] { width: calc(100% - 22px); }
+        button { width: 100%; cursor: pointer; background-color: #4a76a8; color: white; }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chatContainer">
+        <div class="message bot-message">Welcome! How can I assist you today?</div>
+    </div>
+    <div>
+        <input type="text" id="userInput" placeholder="Type your message here..." onkeypress="if(event.keyCode==13) sendMessage();">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:3000');
+        ws.onmessage = function(event) {
+            appendMessage('Bot: ' + event.data, 'bot-message');
+        };
+
+        function appendMessage(message, className) {
+            const chatContainer = document.getElementById('chatContainer');
+            const div = document.createElement('div');
+            div.className = 'message ' + className;
+            div.textContent = message;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (message) {
+                appendMessage('You: ' + message, 'user-message');
+                ws.send(message);
+                input.value = '';
+            }
+        }
+    </script>
+</body>
+</html>
